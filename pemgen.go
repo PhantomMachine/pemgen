@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
-	"encoding/asn1"
 	"encoding/pem"
 	"fmt"
 	"io"
@@ -44,17 +43,12 @@ func WritePrivateKey(w io.Writer, key *rsa.PrivateKey) error {
 }
 
 func WritePublicKey(w io.Writer, key *rsa.PublicKey) error {
-	asn1, err := asn1.Marshal(key)
-	if err != nil {
-		return fmt.Errorf("error calling asn1.marshal: %v", err)
-	}
-
 	pemkey := &pem.Block{
 		Type:  "RSA PUBLIC KEY",
-		Bytes: asn1,
+		Bytes: x509.MarshalPKCS1PublicKey(key),
 	}
 
-	err = pem.Encode(w, pemkey)
+	err := pem.Encode(w, pemkey)
 	if err != nil {
 		return fmt.Errorf("error calling pem.encode: %v", err)
 	}
